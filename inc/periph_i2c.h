@@ -35,8 +35,13 @@ typedef struct {
 
 ERRORSTATUS I2C_On(PeriphI2C* this, ERRORCODE* err);
 ERRORSTATUS I2C_Off(PeriphI2C* this, ERRORCODE* err);
+
 ERRORSTATUS I2C_Send(PeriphI2C* this, uint8_t sadd, const char* str, ERRORCODE* err);
-ERRORSTATUS I2C_Recv(PeriphI2C* this, char* str, ERRORCODE* err);
+ERRORSTATUS I2C_Recv(PeriphI2C* this, uint8_t len, char* str, ERRORCODE *err);
+
+/* TODO */
+ERRORSTATUS I2C_BeginTransmission(PeriphI2C* this, uint8_t sadd, ERRORCODE* err);
+ERRORSTATUS I2C_Write(PeriphI2C* this, uint8_t sadd, ERRORCODE* err);
 
 
 //ERRORSTATUS I2C_BeginTransmission(PeriphI2C* this, uint8_t sadd, ERRORCODE* err);
