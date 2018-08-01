@@ -11,6 +11,10 @@
 #include <mistipos.h>
 #include <stm32l4xx.h>
 
+#define I2C_TOUT (uint32_t)1000
+
+#define I2C_ERR_TOUT (uint32_t)0x20000001
+
 #define I2C_MODE uint32_t
 #define I2C_MODE_S_RECEIVER    (I2C_MODE)0x00000000
 #define I2C_MODE_S_TRANSMITTER (I2C_MODE)0x00000100

@@ -1,5 +1,7 @@
 #include "periph_i2c.h"
 
+extern __weak uint32_t HAL_GetTick(void);
+
 ERRORSTATUS I2C_On(PeriphI2C* this, ERRORCODE* err){
 
 	/* RCC & GPIO */
@@ -108,6 +110,7 @@ ERRORSTATUS I2C_Send(PeriphI2C* this, uint8_t sadd, const char* str, ERRORCODE* 
 
 ERRORSTATUS I2C_Recv(PeriphI2C* this, uint8_t len, char* str, ERRORCODE *err){
 	int recv_len;
+	uint32_t t_ini;
 
 	/* configure slave address in i2c periph */
 	this->i2c->OAR1 &= ~I2C_OAR1_OA1EN;
@@ -122,8 +125,14 @@ ERRORSTATUS I2C_Recv(PeriphI2C* this, uint8_t len, char* str, ERRORCODE *err){
 	recv_len = 0;
 
 	while(recv_len<len){ //TODO timeout
-
-		while((this->i2c->ISR&I2C_ISR_RXNE)==0); //TODO timeout
+		t_ini = HAL_GetTick();
+		while((this->i2c->ISR&I2C_ISR_RXNE)==0){
+			if(HAL_GetTick()-t_ini >= I2C_TOUT){
+				if(err!=NULL)
+					*err = I2C_ERR_TOUT;
+				return ERR;
+			}
+		}
 		recv_len++;
 		str[recv_len] = this->i2c->RXDR;
 	}
