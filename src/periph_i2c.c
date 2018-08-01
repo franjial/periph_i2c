@@ -56,10 +56,10 @@ ERRORSTATUS I2C_On(PeriphI2C* this, ERRORCODE* err){
 	return SUC;
 }
 
-
 ERRORSTATUS I2C_Send(PeriphI2C* this, uint8_t sadd, const char* str, ERRORCODE* err){
 	BOOL finish = FALSE;
 	int i;
+	uint32_t t_ini;
 
 	/* master mode */
 
@@ -80,9 +80,9 @@ ERRORSTATUS I2C_Send(PeriphI2C* this, uint8_t sadd, const char* str, ERRORCODE* 
 	this->i2c->CR2 &= ~I2C_CR2_AUTOEND;
 	this->i2c->CR2 |= I2C_CR2_START;
 
-	/* TODO timeout */
 	i = 1;
-	while(finish==FALSE){
+	t_ini = HAL_GetTick();
+	while(finish==FALSE && HAL_GetTick()-t_ini<I2C_TOUT){
 
 		if((this->i2c->ISR & I2C_ISR_TC) != 0){
 			finish=TRUE;
