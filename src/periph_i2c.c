@@ -2,13 +2,30 @@
 
 extern __weak uint32_t HAL_GetTick(void);
 
+ERRORSTATUS I2C_Reset(PeriphI2C* this, ERRORCODE* err){
+	uint32_t readed;
+
+	this->i2c->CR1 &= ~I2C_CR1_PE;
+	readed = this->i2c->CR1 & I2C_CR1_PE;
+	if(readed!=0){
+		return ERR;
+	}
+	this->i2c->CR1 |= I2C_CR1_PE;
+
+	return SUC;
+}
+
 ERRORSTATUS I2C_On(PeriphI2C* this, ERRORCODE* err){
+	if(err!=NULL)
+		*err = 0;
 
 	/* RCC & GPIO */
 
 	if(this->i2c == I2C1){
 		RCC->APB1ENR1 |= RCC_APB1ENR1_I2C1EN_Msk;
 		RCC->AHB2ENR  |= RCC_AHB2ENR_GPIOBEN;
+
+		this->i2c->CR1 &= ~I2C_CR1_PE;
 
 		GPIOB->MODER   = (GPIOB->MODER & ~(GPIO_MODER_MODER8|GPIO_MODER_MODER9)) | ((GPIO_MODER_MODER8|GPIO_MODER_MODER9) & (uint32_t)(0xA<<16)); /* AF */
 		GPIOB->PUPDR   = (GPIOB->PUPDR & ~(GPIO_PUPDR_PUPDR8|GPIO_PUPDR_PUPDR9)) | ((GPIO_PUPDR_PUPDR8|GPIO_PUPDR_PUPDR9) & (uint32_t)(0x5<<GPIO_PUPDR_PUPD8_Pos)); /* Pull-Up */
@@ -105,7 +122,9 @@ ERRORSTATUS I2C_Send(PeriphI2C* this, uint8_t sadd, const char* str, ERRORCODE* 
 
 	}
 
-	return SUC;
+	if(finish==FALSE && err!=NULL)
+		*err = I2C_TOUT;
+	return finish;
 }
 
 ERRORSTATUS I2C_Recv(PeriphI2C* this, uint8_t len, char* str, ERRORCODE *err){
